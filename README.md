@@ -1,50 +1,151 @@
-# React + TypeScript + Vite
+# MegaMart Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## MegaMart Backend API Documentation
 
-Currently, two official plugins are available:
+This document outlines the available API endpoints for the MegaMart Backend.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Base URL
 
-## Expanding the ESLint configuration
+All API routes are prefixed with `/api/v1`.
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+### User Routes
 
-- Configure the top-level `parserOptions` property like this:
+#### Register User
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+- **URL:** `/users/register`
+- **Method:** `POST`
+- **Input:**
+  ```json
+  {
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "securepassword123"
+  }
+  ```
+- **Success Response:**
+  - **Code:** 201
+  - **Content:**
+    ```json
+    {
+      "message": "user registered successfully!"
+    }
+    ```
+- **Error Response:**
+  - **Code:** 400
+  - **Content:**
+    ```json
+    {
+      "errors": [
+        {
+          "code": "too_small",
+          "minimum": 3,
+          "type": "string",
+          "inclusive": true,
+          "exact": false,
+          "message": "Username must be at least 3 characters long",
+          "path": ["username"]
+        }
+      ]
+    }
+    ```
+    OR
+  - **Code:** 400
+  - **Content:**
+    ```json
+    {
+      "message": "user already exist!"
+    }
+    ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+#### Login User
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- **URL:** `/users/login`
+- **Method:** `POST`
+- **Input:**
+  ```json
+  {
+    "email": "john@example.com",
+    "password": "securepassword123"
+  }
+  ```
+- **Success Response:**
+  - **Code:** 200
+  - **Content:**
+    ```json
+    {
+      "message": "Logged in successfully"
+    }
+    ```
+- **Error Response:**
+  - **Code:** 400
+  - **Content:**
+    ```json
+    {
+      "message": "Invalid email"
+    }
+    ```
+    OR
+  - **Code:** 400
+  - **Content:**
+    ```json
+    {
+      "message": "Invalid password"
+    }
+    ```
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+#### Logout User
+
+- **URL:** `/users/logout`
+- **Method:** `POST`
+- **Input:** None (uses session data)
+- **Success Response:**
+  - **Code:** 200
+  - **Content:**
+    ```json
+    {
+      "message": "Logged out successfully"
+    }
+    ```
+- **Error Response:**
+  - **Code:** 400
+  - **Content:**
+    ```json
+    {
+      "message": "No active session"
+    }
+    ```
+
+#### Get User Profile
+
+- **URL:** `/users/profile`
+- **Method:** `GET`
+- **Authentication:** Required
+- **Input:** None (uses session data)
+- **Success Response:**
+  - **Code:** 200
+  - **Content:**
+    ```json
+    {
+      "_id": "60d5ecb54b24a1234c9f8e7a",
+      "username": "johndoe",
+      "email": "john@example.com",
+      "createdAt": "2023-06-25T12:00:00.000Z",
+      "updatedAt": "2023-06-25T12:00:00.000Z"
+    }
+    ```
+- **Error Response:**
+  - **Code:** 404
+  - **Content:**
+    ```json
+    {
+      "message": "User not found"
+    }
+    ```
+    OR
+  - **Code:** 401
+  - **Content:**
+    ```json
+    {
+      "message": "Unauthorized"
+    }
+    ```
