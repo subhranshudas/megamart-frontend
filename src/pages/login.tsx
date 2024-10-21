@@ -15,6 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
+import useStore from "@/use-store"; // Import the Zustand store
 
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -23,25 +25,11 @@ const loginSchema = z.object({
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
 
-// Dummy loginUser function
-const loginUser = async (
-  data: LoginFormInputs
-): Promise<{ success: boolean }> => {
-  // Simulate API call
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Use data to simulate a more realistic login check
-  const validEmail = "user@example.com";
-  const validPassword = "password123";
-
-  return {
-    success: data.email === validEmail && data.password === validPassword,
-  };
-};
-
 const Login = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  const login = useStore((state) => state.login); // Get the login method from the store
 
   const {
     register,
@@ -54,22 +42,23 @@ const Login = () => {
   const onSubmit = async (data: LoginFormInputs) => {
     setLoading(true);
     try {
-      const result = await loginUser(data);
-      if (result.success) {
-        toast({
-          title: "Success",
-          description: "Login successful!",
-        });
-        // Optionally, redirect or update UI state
-      } else {
-        throw new Error("Login failed");
-      }
-    } catch (error) {
-      console.error("Login failed", error);
+      await login(data); // Call the login method from the store
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Login failed. Please try again.",
+        title: "Success",
+        description: "Login successful! Redirecting...",
+      });
+      setTimeout(() => {
+        navigate("/"); // Redirect to home page after showing the toast
+      }, 2000); // Delay navigation by 2 seconds
+    } catch (error) {
+      // Retained 'error' parameter
+      toast({
+        title: "Login Failed", // Changed title
+        description:
+          error instanceof Error
+            ? error.message // Use the error message from the API
+            : "Login failed. Please check your credentials.", // Fallback message
+        variant: "destructive", // Specify the variant for destructive toast
       });
     } finally {
       setLoading(false);
